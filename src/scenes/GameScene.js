@@ -143,6 +143,20 @@ export class GameScene extends Phaser.Scene {
         });
         this.controlsText.setOrigin(1, 0);
         this.controlsText.setDepth(1000);
+        
+        // Level name display
+        this.levelNameText = this.add.text(
+            this.cameras.main.centerX, 10,  // Top center position
+            '',  // Will be updated in updateDebugDisplay
+            {
+                fontSize: '24px',
+                color: '#ffffff',
+                backgroundColor: 'rgba(0,0,0,0.7)',
+                padding: { x: 15, y: 8 }
+            }
+        );
+        this.levelNameText.setOrigin(0.5, 0);  // Center horizontally
+        this.levelNameText.setDepth(1000);     // Same depth as other UI
     }
 
     /**
@@ -174,6 +188,7 @@ export class GameScene extends Phaser.Scene {
             // Initialize systems with level data
             this.gameState.initializeWithLevel(levelData);
             this.gridManager.initialize(levelData);
+            this.carManager.initializeForLevel(levelData);
             
             console.log('Level loaded successfully');
             
@@ -282,6 +297,11 @@ export class GameScene extends Phaser.Scene {
         ];
         
         this.debugText.setText(debugInfo.join('\n'));
+        
+        // Update level name display
+        if (this.levelNameText && this.gameState.levelName) {
+            this.levelNameText.setText(this.gameState.levelName);
+        }
     }
 
     /**
@@ -325,7 +345,9 @@ export class GameScene extends Phaser.Scene {
      */
     onSimulationStarted() {
         console.log('Simulation started');
-        this.inputManager.disable(); // Disable building during simulation
+        if (this.inputManager) {
+            this.inputManager.disable(); // Disable building during simulation
+        }
     }
 
     /**
@@ -333,7 +355,9 @@ export class GameScene extends Phaser.Scene {
      */
     onSimulationStopped() {
         console.log('Simulation stopped');
-        this.inputManager.enable(); // Re-enable building
+        if (this.inputManager) {
+            this.inputManager.enable(); // Re-enable building
+        }
     }
 
     /**

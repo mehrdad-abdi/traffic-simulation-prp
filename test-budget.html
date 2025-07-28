@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Budget Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .pass { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .fail { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>Budget Initialization Test</h1>
+    <div id="test-results">Running tests...</div>
+    
+    <script type="module">
+        const results = document.getElementById('test-results');
+        
+        async function testBudget() {
+            try {
+                // Import modules
+                const { levelManager } = await import('./src/managers/LevelManager.js');
+                const { gameState } = await import('./src/data/GameState.js');
+                const { GameConfig } = await import('./src/utils/Constants.js');
+                
+                results.innerHTML = '<h2>Test Results:</h2>';
+                
+                // Test 1: Check level-1.json has budget field
+                const response = await fetch('levels/level-1.json');
+                const rawLevel = await response.json();
+                
+                const div1 = document.createElement('div');
+                div1.className = 'test-result';
+                if (rawLevel.budget === 53000) {
+                    div1.className += ' pass';
+                    div1.innerHTML = '✓ level-1.json has budget: 53000';
+                } else {
+                    div1.className += ' fail';
+                    div1.innerHTML = `✗ level-1.json budget is ${rawLevel.budget}, expected 53000`;
+                }
+                results.appendChild(div1);
+                
+                // Test 2: Check default budget
+                const div2 = document.createElement('div');
+                div2.className = 'test-result';
+                if (GameConfig.defaultBudget === 10000) {
+                    div2.className += ' pass';
+                    div2.innerHTML = '✓ GameConfig.defaultBudget is 10000';
+                } else {
+                    div2.className += ' fail';
+                    div2.innerHTML = `✗ GameConfig.defaultBudget is ${GameConfig.defaultBudget}, expected 10000`;
+                }
+                results.appendChild(div2);
+                
+                // Test 3: Load level and check LevelManager
+                await levelManager.loadLevel('levels/level-1.json');
+                
+                const div3 = document.createElement('div');
+                div3.className = 'test-result';
+                const initialBudget = levelManager.getInitialBudget();
+                if (initialBudget === 53000) {
+                    div3.className += ' pass';
+                    div3.innerHTML = '✓ levelManager.getInitialBudget() returns 53000';
+                } else {
+                    div3.className += ' fail';
+                    div3.innerHTML = `✗ levelManager.getInitialBudget() returns ${initialBudget}, expected 53000`;
+                }
+                results.appendChild(div3);
+                
+                // Test 4: Initialize GameState with level
+                const levelData = levelManager.getCurrentLevel();
+                gameState.initializeWithLevel(levelData);
+                
+                const div4 = document.createElement('div');
+                div4.className = 'test-result';
+                if (gameState.budget === 53000) {
+                    div4.className += ' pass';
+                    div4.innerHTML = '✓ gameState.budget is 53000 after initializeWithLevel()';
+                } else {
+                    div4.className += ' fail';
+                    div4.innerHTML = `✗ gameState.budget is ${gameState.budget}, expected 53000`;
+                }
+                results.appendChild(div4);
+                
+                // Test 5: Check level name
+                const div5 = document.createElement('div');
+                div5.className = 'test-result';
+                if (gameState.levelName === 'Welcomevel') {
+                    div5.className += ' pass';
+                    div5.innerHTML = '✓ gameState.levelName is "Welcomevel"';
+                } else {
+                    div5.className += ' fail';
+                    div5.innerHTML = `✗ gameState.levelName is "${gameState.levelName}", expected "Welcomevel"`;
+                }
+                results.appendChild(div5);
+                
+            } catch (error) {
+                results.innerHTML += `<div class="test-result fail">✗ Error: ${error.message}</div>`;
+                console.error('Test error:', error);
+            }
+        }
+        
+        testBudget();
+    </script>
+</body>
+</html>

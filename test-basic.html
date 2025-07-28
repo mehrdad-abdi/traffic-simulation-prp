@@ -115,6 +115,70 @@
                 }
             });
             
+            // Test 9: Level name loads and displays
+            await test('Level name loads and displays', async () => {
+                const { levelManager } = await import('./src/managers/LevelManager.js');
+                const { gameState } = await import('./src/data/GameState.js');
+                
+                // Load level and check name is available
+                const levelData = await levelManager.loadLevel('levels/level-1.json');
+                const levelName = levelManager.getLevelName();
+                
+                if (levelName !== 'Welcomevel') {
+                    throw new Error(`Expected 'Welcomevel', got '${levelName}'`);
+                }
+                
+                // Check GameState stores level name
+                gameState.initializeWithLevel(levelData);
+                if (gameState.levelName !== 'Welcomevel') {
+                    throw new Error(`GameState levelName not set correctly`);
+                }
+            });
+            
+            // Test 10: Level budget initializes correctly
+            await test('Level budget initializes correctly', async () => {
+                const { levelManager } = await import('./src/managers/LevelManager.js');
+                const { gameState } = await import('./src/data/GameState.js');
+                
+                // Load level and check budget
+                const levelData = await levelManager.loadLevel('levels/level-1.json');
+                const initialBudget = levelManager.getInitialBudget();
+                
+                if (initialBudget !== 53000) {
+                    throw new Error(`Expected budget 53000, got ${initialBudget}`);
+                }
+                
+                // Check GameState uses level budget
+                gameState.initializeWithLevel(levelData);
+                if (gameState.budget !== 53000) {
+                    throw new Error(`GameState budget not initialized from level`);
+                }
+            });
+            
+            // Test 11: Backward compatibility with missing name/budget
+            await test('Backward compatibility with missing name/budget', async () => {
+                const { levelManager } = await import('./src/managers/LevelManager.js');
+                
+                // Mock level without name/budget
+                const mockLevel = {
+                    grid: { rows: 5, column: 5, uneditable: [] },
+                    cars: [{ color: 'red', entrances: [{row: 1, column: 0}], exit: {row: 1, column: -1} }]
+                };
+                
+                levelManager.currentLevel = mockLevel;
+                
+                const name = levelManager.getLevelName();
+                const budget = levelManager.getInitialBudget();
+                
+                if (name !== 'Unnamed Level') {
+                    throw new Error(`Expected fallback name, got '${name}'`);
+                }
+                
+                if (typeof budget !== 'number' || budget <= 0) {
+                    throw new Error(`Expected fallback budget, got ${budget}`);
+                }
+            });
+            
             // Summary
             const summaryDiv = document.createElement('div');
             summaryDiv.style.marginTop = '20px';

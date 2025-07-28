@@ -1,7 +1,7 @@
 // Traffic Simulation Game - Level Management System
 // Handles loading, validation, and processing of level JSON files
 
-import { LevelLimits, CellTypes } from '../utils/Constants.js';
+import { GameConfig, LevelLimits, CellTypes } from '../utils/Constants.js';
 import { jsonToInternal, processEntranceCoordinates, isValidGridPosition } from '../utils/Helpers.js';
 
 export class LevelManager {
@@ -100,6 +100,15 @@ export class LevelManager {
         levelData.cars.forEach((car, index) => {
             this.validateCarStructure(car, index);
         });
+        
+        // Validate optional level name and budget fields
+        if (levelData.name && typeof levelData.name !== 'string') {
+            throw new Error("Level name must be a string");
+        }
+        
+        if (levelData.budget && (typeof levelData.budget !== 'number' || levelData.budget <= 0)) {
+            throw new Error("Level budget must be a positive number");
+        }
     }
 
     /**
@@ -254,6 +263,22 @@ export class LevelManager {
                 }
             });
         }
+    }
+
+    /**
+     * Get the current level name
+     * @returns {string} Level name or default fallback
+     */
+    getLevelName() {
+        return this.currentLevel?.name || 'Unnamed Level';
+    }
+
+    /**
+     * Get the initial budget for the current level
+     * @returns {number} Level budget or default fallback
+     */
+    getInitialBudget() {
+        return this.currentLevel?.budget || GameConfig.defaultBudget;
     }
 
     /**

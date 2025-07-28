@@ -3,6 +3,7 @@
 
 import { GameConfig, Tools, GameStates, CarStates } from '../utils/Constants.js';
 import { gridKey } from '../utils/Helpers.js';
+import { levelManager } from '../managers/LevelManager.js';
 
 export class GameState {
     constructor() {
@@ -15,13 +16,14 @@ export class GameState {
      */
     reset() {
         // Core game state
-        this.budget = GameConfig.startingBudget;
+        this.budget = GameConfig.defaultBudget;
         this.currentTool = Tools.PLACE;
         this.gameState = GameStates.BUILDING;
         this.isSimulating = false;
         
         // Level and grid data
         this.level = null;
+        this.levelName = null;
         this.gridDimensions = { rows: 0, columns: 0 };
         
         // Placed roads - Map of "row,col" -> Road object
@@ -58,6 +60,8 @@ export class GameState {
      */
     initializeWithLevel(levelData) {
         this.level = levelData;
+        this.levelName = levelManager.getLevelName();
+        this.budget = levelManager.getInitialBudget();
         this.gridDimensions = {
             rows: levelData.grid.rows,
             columns: levelData.grid.columns
@@ -75,6 +79,7 @@ export class GameState {
         
         console.log('Game state initialized with level:', levelData);
         this.emit('levelLoaded', levelData);
+        this.emit('budgetChanged', this.budget);
     }
 
     /**
@@ -466,6 +471,14 @@ export class GameState {
     }
 
     /**
+     * Get current level name
+     * @returns {string|null} Level name or null if no level loaded
+     */
+    getLevelName() {
+        return this.levelName;
+    }
+
+    /**
      * Event System
      */
     
@@ -473,23 +486,32 @@ export class GameState {
      * Add event listener
      * @param {string} event - Event name
      * @param {Function} callback - Callback function
+     * @param {Object} context - Context (this) for the callback
      */
-    on(event, callback) {
+    on(event, callback, context) {
         if (!this.eventListeners.has(event)) {
             this.eventListeners.set(event, []);
         }
-        this.eventListeners.get(event).push(callback);
+        this.eventListeners.get(event).push({ callback, context });
     }
 
     /**
      * Remove event listener
      * @param {string} event - Event name
      * @param {Function} callback - Callback function
+     * @param {Object} context - Context (this) for the callback
      */
-    off(event, callback) {
+    off(event, callback, context) {
         const listeners = this.eventListeners.get(event);
         if (listeners) {
-            const index = listeners.indexOf(callback);
+            const index = listeners.findIndex(listener => {
+                // Handle both old format (function) and new format ({callback, context})
+                if (typeof listener === 'function') {
+                    return listener === callback;
+                } else {
+                    return listener.callback === callback && listener.context === context;
+                }
+            });
             if (index !== -1) {
                 listeners.splice(index, 1);
             }
@@ -504,9 +526,20 @@ export class GameState {
     emit(event, data) {
         const listeners = this.eventListeners.get(event);
         if (listeners) {
-            listeners.forEach(callback => {
+            listeners.forEach(listener => {
                 try {
-                    callback(data);
+                    // Handle both old format (function) and new format ({callback, context})
+                    if (typeof listener === 'function') {
+                        // Old format - just a function
+                        listener(data);
+                    } else if (listener.callback) {
+                        // New format - object with callback and context
+                        if (listener.context) {
+                            listener.callback.call(listener.context, data);
+                        } else {
+                            listener.callback(data);
+                        }
+                    }
                 } catch (error) {
                     console.error(`Error in event listener for ${event}:`, error);
                 }

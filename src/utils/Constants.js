@@ -8,7 +8,7 @@ export const GameConfig = {
     gridLineWidth: 1,           // Width of grid lines
     
     // Economy
-    startingBudget: 10000,      // Starting budget for the player
+    defaultBudget: 10000,       // Default budget used when level doesn't specify budget
     roadCost: 1000,             // Cost to place one road tile
     
     // Timing and Performance
