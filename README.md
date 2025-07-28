@@ -2,6 +2,10 @@
 
 A single-player, grid-based traffic simulation and optimization puzzle game built with Phaser.js. Players design and manage road intersections to maximize traffic flow efficiency while staying within budget constraints.
 
+The purpose in this project is not developing an open source allternative for https://store.steampowered.com/app/2677310/GRIDROAD/. 
+Purchase the original game if you are intrested in playing. 
+This project is just a practicing exercise to evalute the claude-code based on https://www.youtube.com/watch?v=Egeuql3Lrzg.
+
 ## 🎮 Game Overview
 
 Design road networks on a grid to guide vehicles from their entrances to exits efficiently. Create intersections, manage traffic flow, and avoid traffic jams that could cause level failure. The game features:
