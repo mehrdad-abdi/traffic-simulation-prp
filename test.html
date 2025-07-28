@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Module Test</title>
+</head>
+<body>
+    <div id="test">Testing module imports...</div>
+    
+    <script type="module">
+        try {
+            console.log('Testing imports...');
+            
+            // Test basic constants
+            import { GameConfig } from './src/utils/Constants.js';
+            console.log('✓ Constants loaded:', GameConfig.cellSize);
+            
+            // Test helpers
+            import { gridKey } from './src/utils/Helpers.js';
+            console.log('✓ Helpers loaded:', gridKey(1, 2));
+            
+            // Test game state
+            import { gameState } from './src/data/GameState.js';
+            console.log('✓ GameState loaded:', gameState.budget);
+            
+            // Test level manager
+            import { levelManager } from './src/managers/LevelManager.js';
+            console.log('✓ LevelManager loaded');
+            
+            // Test pathfinder
+            import { pathFinder } from './src/utils/PathFinder.js';
+            console.log('✓ PathFinder loaded');
+            
+            document.getElementById('test').innerHTML = 'All modules loaded successfully! Check console for details.';
+            
+        } catch (error) {
+            console.error('Module import error:', error);
+            document.getElementById('test').innerHTML = 'Module import failed: ' + error.message;
+        }
+    </script>
+</body>
+</html>

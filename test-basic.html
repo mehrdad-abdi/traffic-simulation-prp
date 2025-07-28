@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Basic Unit Tests</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .pass { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .fail { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        .pending { background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; }
+    </style>
+</head>
+<body>
+    <h1>Traffic Simulation - Basic Unit Tests</h1>
+    <div id="test-results">Running tests...</div>
+    
+    <!-- Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.85.2/dist/phaser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pathfinding@0.4.18/visual/lib/pathfinding-browser.min.js"></script>
+    
+    <script type="module">
+        const results = document.getElementById('test-results');
+        let testCount = 0;
+        let passCount = 0;
+        
+        function test(name, testFn) {
+            testCount++;
+            const testDiv = document.createElement('div');
+            testDiv.className = 'test-result pending';
+            testDiv.innerHTML = `Test ${testCount}: ${name} - Running...`;
+            results.appendChild(testDiv);
+            
+            return Promise.resolve().then(testFn).then(() => {
+                testDiv.className = 'test-result pass';
+                testDiv.innerHTML = `✓ Test ${testCount}: ${name} - PASSED`;
+                passCount++;
+            }).catch(error => {
+                testDiv.className = 'test-result fail';
+                testDiv.innerHTML = `✗ Test ${testCount}: ${name} - FAILED: ${error.message}`;
+                console.error(`Test ${testCount} failed:`, error);
+            });
+        }
+        
+        async function runTests() {
+            results.innerHTML = '<h2>Running Tests...</h2>';
+            
+            // Test 1: Libraries loaded
+            await test('Libraries are loaded', () => {
+                if (typeof Phaser === 'undefined') throw new Error('Phaser not loaded');
+                if (typeof PF === 'undefined') throw new Error('PathFinding.js not loaded');
+            });
+            
+            // Test 2: PathFinding.js API
+            await test('PathFinding.js API is correct', () => {
+                if (!PF.AStarFinder) throw new Error('AStarFinder missing');
+                if (!PF.Grid) throw new Error('Grid missing'); 
+                if (!PF.Heuristic) throw new Error('Heuristic missing');
+                if (!PF.Heuristic.manhattan) throw new Error('manhattan heuristic missing');
+            });
+            
+            // Test 3: Basic PathFinding functionality
+            await test('Basic pathfinding works', () => {
+                const finder = new PF.AStarFinder({
+                    allowDiagonal: false,
+                    heuristic: PF.Heuristic.manhattan
+                });
+                const grid = new PF.Grid(5, 5);
+                const path = finder.findPath(0, 0, 4, 4, grid.clone());
+                if (!path || path.length === 0) throw new Error('No path found');
+            });
+            
+            // Test 4: Constants module
+            await test('Constants module loads', async () => {
+                const { GameConfig, Colors } = await import('./src/utils/Constants.js');
+                if (!GameConfig.cellSize) throw new Error('GameConfig.cellSize missing');
+                if (!Colors.editable) throw new Error('Colors.editable missing');
+            });
+            
+            // Test 5: Helpers module
+            await test('Helpers module loads', async () => {
+                const { gridKey, gridToWorld } = await import('./src/utils/Helpers.js');
+                const key = gridKey(1, 2);
+                if (key !== '1,2') throw new Error('gridKey function incorrect');
+                
+                const pos = gridToWorld(0, 0);
+                if (typeof pos.x !== 'number' || typeof pos.y !== 'number') {
+                    throw new Error('gridToWorld function incorrect');
+                }
+            });
+            
+            // Test 6: GameState module
+            await test('GameState module loads', async () => {
+                const { gameState } = await import('./src/data/GameState.js');
+                if (typeof gameState.budget !== 'number') throw new Error('GameState.budget missing');
+                if (typeof gameState.reset !== 'function') throw new Error('GameState.reset missing');
+            });
+            
+            // Test 7: PathFinder module
+            await test('PathFinder module loads and initializes', async () => {
+                const { pathFinder } = await import('./src/utils/PathFinder.js');
+                if (!pathFinder.finder) throw new Error('PathFinder not initialized');
+                
+                pathFinder.initializeGrid(10, 10);
+                const stats = pathFinder.getStats();
+                if (stats.gridWidth !== 10 || stats.gridHeight !== 10) {
+                    throw new Error('Grid initialization failed');
+                }
+            });
+            
+            // Test 8: LevelManager module
+            await test('LevelManager module loads', async () => {
+                const { levelManager } = await import('./src/managers/LevelManager.js');
+                if (typeof levelManager.loadLevel !== 'function') {
+                    throw new Error('levelManager.loadLevel missing');
+                }
+            });
+            
+            // Summary
+            const summaryDiv = document.createElement('div');
+            summaryDiv.style.marginTop = '20px';
+            summaryDiv.style.padding = '15px';
+            summaryDiv.style.borderRadius = '5px';
+            summaryDiv.style.fontWeight = 'bold';
+            
+            if (passCount === testCount) {
+                summaryDiv.className = 'test-result pass';
+                summaryDiv.innerHTML = `🎉 All ${testCount} tests passed! Game should work now.`;
+            } else {
+                summaryDiv.className = 'test-result fail';
+                summaryDiv.innerHTML = `❌ ${testCount - passCount} of ${testCount} tests failed. Check errors above.`;
+            }
+            
+            results.appendChild(summaryDiv);
+        }
+        
+        // Run tests when page loads
+        runTests().catch(error => {
+            console.error('Test runner error:', error);
+        });
+    </script>
+</body>
+</html>

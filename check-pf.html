@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PathFinding.js API Check</title>
+</head>
+<body>
+    <div id="output">Checking PathFinding.js API...</div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/pathfinding@0.4.18/visual/lib/pathfinding-browser.min.js"></script>
+    
+    <script>
+        const output = document.getElementById('output');
+        
+        function log(msg) {
+            console.log(msg);
+            output.innerHTML += msg + '<br>';
+        }
+        
+        try {
+            log('PF object: ' + typeof PF);
+            
+            if (typeof PF !== 'undefined') {
+                log('PF keys: ' + Object.keys(PF).join(', '));
+                
+                if (PF.DiagonalMovement) {
+                    log('DiagonalMovement keys: ' + Object.keys(PF.DiagonalMovement).join(', '));
+                } else {
+                    log('DiagonalMovement is undefined');
+                }
+                
+                if (PF.Heuristic) {
+                    log('Heuristic keys: ' + Object.keys(PF.Heuristic).join(', '));
+                } else {
+                    log('Heuristic is undefined');
+                }
+                
+                if (PF.AStarFinder) {
+                    log('AStarFinder available');
+                    
+                    // Try to create with basic config
+                    try {
+                        const finder = new PF.AStarFinder();
+                        log('Basic AStarFinder created successfully');
+                    } catch (e) {
+                        log('Error creating basic AStarFinder: ' + e.message);
+                    }
+                } else {
+                    log('AStarFinder is undefined');
+                }
+                
+                if (PF.Grid) {
+                    log('Grid available');
+                    
+                    try {
+                        const grid = new PF.Grid(5, 5);
+                        log('Basic Grid created successfully');
+                    } catch (e) {
+                        log('Error creating basic Grid: ' + e.message);
+                    }
+                } else {
+                    log('Grid is undefined');
+                }
+            } else {
+                log('PF is undefined - library not loaded');
+            }
+        } catch (error) {
+            log('Error: ' + error.message);
+        }
+    </script>
+</body>
+</html>

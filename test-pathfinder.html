@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PathFinder Test</title>
+</head>
+<body>
+    <div id="output">Testing PathFinder...</div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/pathfinding@0.4.18/visual/lib/pathfinding-browser.min.js"></script>
+    
+    <script type="module">
+        const output = document.getElementById('output');
+        
+        function log(msg) {
+            console.log(msg);
+            output.innerHTML += msg + '<br>';
+        }
+        
+        try {
+            log('1. Testing PathFinding.js library...');
+            
+            // Test basic PathFinding.js functionality
+            const finder = new PF.AStarFinder({
+                allowDiagonal: false,
+                dontCrossCorners: true,
+                heuristic: PF.Heuristic.manhattan,
+                weight: 1
+            });
+            log('✓ AStarFinder created successfully');
+            
+            const grid = new PF.Grid(5, 5);
+            log('✓ Grid created successfully');
+            
+            // Test pathfinding
+            const path = finder.findPath(0, 0, 4, 4, grid.clone());
+            log('✓ Path found: ' + path.length + ' steps');
+            
+            log('2. Testing our PathFinder module...');
+            
+            const { pathFinder } = await import('./src/utils/PathFinder.js');
+            log('✓ PathFinder module imported');
+            
+            // Test initialization
+            pathFinder.initializeGrid(10, 10);
+            log('✓ PathFinder grid initialized');
+            
+            // Test pathfinding
+            const roads = new Map();
+            roads.set('0,0', {});
+            roads.set('0,1', {});
+            roads.set('0,2', {});
+            roads.set('1,2', {});
+            roads.set('2,2', {});
+            
+            pathFinder.updateGrid(roads, new Set(), 10, 10);
+            log('✓ PathFinder grid updated');
+            
+            const ourPath = pathFinder.findPath(0, 0, 2, 2);
+            log('✓ PathFinder found path: ' + (ourPath ? ourPath.length + ' steps' : 'no path'));
+            
+            log('✅ All PathFinder tests passed!');
+            
+        } catch (error) {
+            log('❌ Error: ' + error.message);
+            console.error('Full error:', error);
+        }
+    </script>
+</body>
+</html>

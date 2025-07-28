@@ -1,0 +1,75 @@
+{
+    "grid": {
+        "rows": 7,
+        "column": 12,
+        "uneditable": [
+            {
+                "row-from": 4,
+                "row-to": 6,
+                "column-from": 2,
+                "column-to": 4,
+                "type": "tree"
+            },
+            {
+                "row-from": 4,
+                "row-to": 6,
+                "column-from": 9,
+                "column-to": 11,
+                "type": "building"
+            }
+        ]
+    },
+    "cars": [
+        {
+            "color": "red",
+            "entrances": [
+                {
+                    "row": 3,
+                    "column": -1
+                },
+                {
+                    "row": -1,
+                    "column": 6
+                }
+            ],
+            "exit": {
+                "row": 3,
+                "column": 0
+            }
+        },
+        {
+            "color": "blue",
+            "entrances": [
+                {
+                    "row": 2,
+                    "column": 0
+                },
+                {
+                    "row": 3,
+                    "column": -1
+                }
+            ],
+            "exit": {
+                "row": -1,
+                "column": 7
+            }
+        },
+        {
+            "color": "yellow",
+            "entrances": [
+                {
+                    "row": 2,
+                    "column": 0
+                },
+                {
+                    "row": -1,
+                    "column": 6
+                }
+            ],
+            "exit": {
+                "row": 2,
+                "column": -1
+            }
+        }
+    ]
+}

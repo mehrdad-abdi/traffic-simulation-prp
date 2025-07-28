@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Traffic Simulation Debug</title>
+    <style>
+        body { margin: 0; padding: 20px; background: #222; color: #fff; font-family: Arial, sans-serif; }
+        #debug { margin: 20px 0; padding: 10px; background: #333; border-radius: 5px; }
+        #game-container { border: 2px solid #333; background: #000; }
+    </style>
+</head>
+<body>
+    <h1>Traffic Simulation Debug</h1>
+    <div id="debug">Debug info will appear here...</div>
+    <div id="game-container"></div>
+    
+    <!-- Phaser.js v3.85+ from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.85.2/dist/phaser.min.js"></script>
+    
+    <!-- PathFinding.js from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/pathfinding@0.4.18/visual/lib/pathfinding-browser.min.js"></script>
+    
+    <script type="module">
+        const debugDiv = document.getElementById('debug');
+        
+        function log(message) {
+            console.log(message);
+            debugDiv.innerHTML += message + '<br>';
+        }
+        
+        try {
+            log('1. Checking library loading...');
+            if (typeof Phaser === 'undefined') {
+                throw new Error('Phaser.js not loaded!');
+            }
+            if (typeof PF === 'undefined') {
+                throw new Error('PathFinding.js not loaded!');
+            }
+            log('✓ Libraries loaded successfully');
+            
+            log('2. Testing Constants import...');
+            const { GameConfig, Colors } = await import('./src/utils/Constants.js');
+            log('✓ Constants imported: cellSize=' + GameConfig.cellSize);
+            
+            log('3. Testing Helpers import...');
+            const { gridKey, gridToWorld } = await import('./src/utils/Helpers.js');
+            log('✓ Helpers imported: gridKey(1,2)=' + gridKey(1, 2));
+            
+            log('4. Testing GameState import...');
+            const { gameState } = await import('./src/data/GameState.js');
+            log('✓ GameState imported: budget=' + gameState.budget);
+            
+            log('5. Testing PathFinder import...');
+            const { pathFinder } = await import('./src/utils/PathFinder.js');
+            log('✓ PathFinder imported');
+            
+            log('6. Testing LevelManager import...');
+            const { levelManager } = await import('./src/managers/LevelManager.js');
+            log('✓ LevelManager imported');
+            
+            log('7. Creating minimal Phaser game...');
+            
+            class TestScene extends Phaser.Scene {
+                constructor() {
+                    super({ key: 'TestScene' });
+                }
+                
+                create() {
+                    this.add.text(50, 50, 'Phaser is working!', { fontSize: '32px', color: '#ffffff' });
+                    log('✓ Phaser scene created successfully');
+                }
+            }
+            
+            const gameConfig = {
+                type: Phaser.AUTO,
+                width: 800,
+                height: 600,
+                parent: 'game-container',
+                backgroundColor: '#2c3e50',
+                scene: [TestScene]
+            };
+            
+            const game = new Phaser.Game(gameConfig);
+            log('✓ Minimal Phaser game created');
+            
+        } catch (error) {
+            log('❌ Error: ' + error.message);
+            console.error('Full error:', error);
+        }
+    </script>
+</body>
+</html>
